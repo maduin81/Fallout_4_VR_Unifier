@@ -34,7 +34,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>FALLOUT-4-HIGH-RES-ICON-SET-_png-and-_ico-2.ico</ApplicationIcon>
+    <ApplicationIcon>appicon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="INIFileParser, Version=2.5.2.0, Culture=neutral, PublicKeyToken=79af7b307b65cf3c, processorArchitecture=MSIL">
@@ -81,13 +81,9 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="bin\Release\" />
-    <Folder Include="FO4VR\" />
-    <Folder Include="FO4\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="FALLOUT-4-HIGH-RES-ICON-SET-_png-and-_ico-2.ico" />
+    <Content Include="appicon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
