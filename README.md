@@ -18,18 +18,18 @@ Fallout_4_VR_Unifier.exe /m=<mode>
 <mode> being 'vr' for FO4VR and 'flat' for FO4.
 
 # INI files settings (Generated on first run)
-ShareSaves = True // Save folder is shared between both installations, no copying saves back and forth if switching clients<br />
-NMMCompatible = True // Plugins.txt/DLCList.txt is redirected from Fallout 4 to Fallout 4 VR automatically<br />
-DataPath = c:\program files (x86)\steam\steamapps\common\fallout 4 VR\data // Fallout 4 VR's data path, not sure what'll happen if this is way different<br />
-Fallout4Path = c:\program files (x86)\steam\steamapps\common\fallout 4\ // Installation path for Fallout 4<br />
-Fallout4VRPath = c:\program files (x86)\steam\steamapps\common\fallout 4 vr\ // Installation path for Fallout 4 VR<br />
-Fallout4Exe = Fallout4.exe // Executable launched when clicking Fallout 4<br />
-Fallout4LaunchOptions = // Command line arguments, though Steam might not like this<br />
-Fallout4VRExe = Fallout4Vr.exe // Executable launched when clicking Fallout 4 VR<br />
-Fallout4VRLaunchOptions = // Command line arguments, though Steam might not like this<br />
-Fallout4AppId = 377160 // Steam's AppID for Fallout 4, not currently used here<br />
-Fallout4VrAppId = 611660 // Steam's AppID for Fallout 4 VR, not currently used here<br />
-SteamPath = c:\program files (x86)\steam // Installation path for Steam, not currently used here<br />
+* ShareSaves = True // Save folder is shared between both installations, no copying saves back and forth if switching clients<br />
+* NMMCompatible = True // Plugins.txt/DLCList.txt is redirected from Fallout 4 to Fallout 4 VR automatically<br />
+* DataPath = c:\program files (x86)\steam\steamapps\common\fallout 4 VR\data // Fallout 4 VR's data path, not sure what'll happen if this is way different<br />
+* Fallout4Path = c:\program files (x86)\steam\steamapps\common\fallout 4\ // Installation path for Fallout 4<br />
+* Fallout4VRPath = c:\program files (x86)\steam\steamapps\common\fallout 4 vr\ // Installation path for Fallout 4 VR<br />
+* Fallout4Exe = Fallout4.exe // Executable launched when clicking Fallout 4<br />
+* Fallout4LaunchOptions = // Command line arguments, though Steam might not like this<br />
+* Fallout4VRExe = Fallout4Vr.exe // Executable launched when clicking Fallout 4 VR<br />
+* Fallout4VRLaunchOptions = // Command line arguments, though Steam might not like this<br />
+* Fallout4AppId = 377160 // Steam's AppID for Fallout 4, not currently used here<br />
+* Fallout4VrAppId = 611660 // Steam's AppID for Fallout 4 VR, not currently used here<br />
+* SteamPath = c:\program files (x86)\steam // Installation path for Steam, not currently used here<br />
 
 To install -
 1) Install Fallout 4
