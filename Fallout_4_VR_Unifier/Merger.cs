@@ -28,12 +28,21 @@ namespace Fallout_4_VR_Unifier
 
         [DllImport("kernel32.dll")]
         static extern bool CreateSymbolicLink(
-      string lpSymlinkFileName, string lpTargetFileName, SymbolicLink dwFlags);
+        string lpSymlinkFileName, string lpTargetFileName, SymbolicLink dwFlags);
 
         public enum SymbolicLink
         {
             File = 0,
             Directory = 1
+        }
+
+        public Merger()
+        {
+            if (!File.Exists(IniName))
+            {
+                Console.WriteLine("No INI Found, creating default INI...");
+                _WriteDefaultIni();
+            }
         }
 
         public void RunMerge(string mode = "")
