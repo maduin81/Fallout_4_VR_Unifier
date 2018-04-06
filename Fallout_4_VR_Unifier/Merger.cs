@@ -25,24 +25,26 @@ namespace Fallout_4_VR_Unifier
         public string Fo4VrExeName = "Fallout4Vr.exe";
         public string Fo4LaunchOptions = "";
         public string Fo4VrLaunchOptions = "";
+        public string Fo4Files = "";
+        public string Fo4VrFiles = "";
 
         [DllImport("kernel32.dll")]
         static extern bool CreateSymbolicLink(
         string lpSymlinkFileName, string lpTargetFileName, SymbolicLink dwFlags);
 
+        [Flags]
         public enum SymbolicLink
         {
             File = 0,
-            Directory = 1
+            Directory = 1,
+            AllowUnprivilegedCreate = 2
         }
 
         public Merger()
         {
-            if (!File.Exists(IniName))
-            {
-                Console.WriteLine("No INI Found, creating default INI...");
-                _WriteDefaultIni();
-            }
+            Console.WriteLine("Reading INI...");
+            ReadIni();
+            Console.WriteLine("INI Loaded...");
         }
 
         public void RunMerge(string mode = "")
@@ -53,24 +55,20 @@ namespace Fallout_4_VR_Unifier
 
             try
             {
-                Console.WriteLine("Reading INI...");
-                merger.ReadIni();
-
-                Console.WriteLine("INI Loaded, creating Forward SymLinks...");
-
+                Console.WriteLine("Creating Forward SymLinks...");
 
                 var args = Environment.GetCommandLineArgs().ToList();
 
                 if (args.Any() || !string.IsNullOrWhiteSpace(mode))
                 {
                     var arg = args.FirstOrDefault(s => s.ToLower().Contains("/m="))?.Split('=')[1];
-                    if ((arg != null && arg.ToLower() == "vr") || mode == "vr")
+                    if (((arg != null && arg.ToLower() == "vr")) || mode == "vr")
                     {
                         merger.CreateForwardSymLinks(merger.Fo4VrSourcePath);
                         exePath = Path.Combine(merger.Fo4VrInstallPath, merger.Fo4VrExeName);
                         options = merger.Fo4VrLaunchOptions;
                     }
-                    else if ((arg != null && arg.ToLower() == "flat") || mode == "flat")
+                    else if (((arg != null && arg.ToLower() == "flat")) || mode == "flat")
                     {
                         merger.CreateForwardSymLinks(merger.Fo4SourcePath);
                         exePath = Path.Combine(merger.Fo4InstallPath, merger.Fo4ExeName);
@@ -342,62 +340,74 @@ namespace Fallout_4_VR_Unifier
 
         public void Unmerge()
         {
-            var gamesFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "My Games");
-            
-            const string fo4Vr = "Fallout4VR";
-            const string saves = @"Saves\";
-
-            if (Directory.Exists(Path.Combine(gamesFolder, fo4Vr, saves)) && File.GetAttributes(Path.Combine(gamesFolder, fo4Vr, saves)).HasFlag(FileAttributes.ReparsePoint))
+            try
             {
-                DeleteSymbolicLink(Path.Combine(gamesFolder, fo4Vr, saves), SymbolicLink.Directory);
+                var gamesFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "My Games");
+
+                const string fo4Vr = "Fallout4VR";
+                const string saves = @"Saves\";
+
+                if (Directory.Exists(Path.Combine(gamesFolder, fo4Vr, saves)) && File.GetAttributes(Path.Combine(gamesFolder, fo4Vr, saves)).HasFlag(FileAttributes.ReparsePoint))
+                {
+                    DeleteSymbolicLink(Path.Combine(gamesFolder, fo4Vr, saves), SymbolicLink.Directory);
+                }
+
+                var lastSaveFolder = Directory.GetDirectories(Path.Combine(gamesFolder, fo4Vr))
+                    .Where(s => s.Contains("Saves_"))
+                    .OrderByDescending(s => s).FirstOrDefault()?.ToString();
+
+                if (!string.IsNullOrWhiteSpace(lastSaveFolder) && !Directory.Exists(Path.Combine(gamesFolder, fo4Vr, saves)))
+                {
+                    Directory.Move(lastSaveFolder, Path.Combine(gamesFolder, fo4Vr, saves));
+                }
+
+                var targetDirName =
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Fallout4VR");
+
+                if (Directory.Exists(targetDirName) && File.GetAttributes(targetDirName).HasFlag(FileAttributes.ReparsePoint))
+                {
+                    DeleteSymbolicLink(targetDirName, SymbolicLink.Directory);
+                }
+
+                var lastAppdataFolder = Directory.GetDirectories(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData))
+                    .Where(s => s.Contains("Fallout4VR_"))
+                    .OrderByDescending(s => s).FirstOrDefault()?.ToString();
+
+                if (!string.IsNullOrWhiteSpace(lastAppdataFolder) && !Directory.Exists(targetDirName))
+                {
+                    Directory.Move(lastAppdataFolder, targetDirName);
+                }
+
+                var fo4DataPath = Path.Combine(Fo4InstallPath, "Data");
+
+                if (Directory.Exists(fo4DataPath) && File.GetAttributes(fo4DataPath).HasFlag(FileAttributes.ReparsePoint))
+                {
+                    DeleteSymbolicLink(fo4DataPath, SymbolicLink.Directory);
+                }
+
+                var lastDataFolder = Directory.GetDirectories(Fo4InstallPath)
+                    .Where(s => s.Contains("Data_"))
+                    .OrderByDescending(s => s).FirstOrDefault()?.ToString();
+
+                if (!string.IsNullOrWhiteSpace(lastDataFolder) && !Directory.Exists(fo4DataPath))
+                {
+                    Directory.Move(lastDataFolder, fo4DataPath);
+                }
+
+                CleanupDataFolder(Path.Combine(TargetPath, Fo4VrSourcePath));
+                CleanupDataFolder(Path.Combine(TargetPath, Fo4SourcePath));
+
+                Console.WriteLine("Returning FO4 Files...");
+                ReturnFiles(Path.Combine(TargetPath, Fo4VrSourcePath), TargetPath);
+                Console.WriteLine("Returning FO4VR Files...");
+                ReturnFiles(Path.Combine(TargetPath, Fo4SourcePath), Path.Combine(Fo4InstallPath, @".\Dir"));
+                Console.WriteLine("Uninstall complete.");
             }
-
-            var lastSaveFolder = Directory.GetDirectories(Path.Combine(gamesFolder, fo4Vr))
-                .Where(s => s.Contains("Saves_"))
-                .OrderByDescending(s => s).FirstOrDefault()?.ToString();
-
-            if (!string.IsNullOrWhiteSpace(lastSaveFolder) && !Directory.Exists(Path.Combine(gamesFolder, fo4Vr, saves)))
+            catch (Exception e)
             {
-                Directory.Move(lastSaveFolder, Path.Combine(gamesFolder, fo4Vr, saves));
+                Console.WriteLine("===========An Error has occurred.===========");
+                Console.WriteLine(e.Message.ToString());
             }
-
-            var targetDirName =
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Fallout4VR");
-
-            if (Directory.Exists(targetDirName) && File.GetAttributes(targetDirName).HasFlag(FileAttributes.ReparsePoint))
-            {
-                DeleteSymbolicLink(targetDirName, SymbolicLink.Directory);
-            }
-
-            var lastAppdataFolder = Directory.GetDirectories(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData))
-                .Where(s => s.Contains("Fallout4VR_"))
-                .OrderByDescending(s => s).FirstOrDefault()?.ToString();
-
-            if (!string.IsNullOrWhiteSpace(lastAppdataFolder) && !Directory.Exists(targetDirName))
-            {
-                Directory.Move(lastAppdataFolder, targetDirName);
-            }
-
-            var fo4DataPath = Path.Combine(Fo4InstallPath, "Data");
-
-            if (Directory.Exists(fo4DataPath) && File.GetAttributes(fo4DataPath).HasFlag(FileAttributes.ReparsePoint))
-            {
-                DeleteSymbolicLink(fo4DataPath, SymbolicLink.Directory);
-            }
-
-            var lastDataFolder = Directory.GetDirectories(Fo4InstallPath)
-                .Where(s => s.Contains("Data_"))
-                .OrderByDescending(s => s).FirstOrDefault()?.ToString();
-
-            if (!string.IsNullOrWhiteSpace(lastDataFolder) && !Directory.Exists(fo4DataPath))
-            {
-                Directory.Move(lastDataFolder, fo4DataPath);
-            }
-
-            CleanupDataFolder(Path.Combine(TargetPath, Fo4VrSourcePath));
-            CleanupDataFolder(Path.Combine(TargetPath, Fo4SourcePath));
-
-            ReturnFiles();
         }
 
         public void CleanupDataFolder(string sourcePath)
@@ -435,18 +445,38 @@ namespace Fallout_4_VR_Unifier
             }            
         }
 
-        public void ReturnFiles()
+        public void ReturnFiles(string sourcePath, string targetPath)
         {            
-            foreach (string dirPath in Directory.GetDirectories(Path.Combine(TargetPath, Fo4VrSourcePath), "*",
-                SearchOption.AllDirectories))
+            foreach (var dir in Directory.GetDirectories(sourcePath))
             {
-                Directory.CreateDirectory(dirPath.Replace(Path.Combine(TargetPath, Fo4VrSourcePath), TargetPath));
+                var newDir = Path.Combine(targetPath, Path.GetDirectoryName(dir));                
+
+                if (!Directory.Exists(newDir))
+                {
+                    Console.WriteLine($"Moving {dir} to {newDir}.");
+                    Directory.Move(dir, newDir);
+                }
+                else
+                {
+                    Console.WriteLine($"Directory already exists, moving {dir} to {newDir}_{DateTime.Now:yyyyMMddHHmmss}.");
+                    Directory.Move(dir, $"{newDir}_{DateTime.Now:yyyyMMddHHmmss}");
+                }                
             }
             
-            foreach (string newPath in Directory.GetFiles(Path.Combine(TargetPath, Fo4VrSourcePath), "*.*",
-                SearchOption.AllDirectories))
+            foreach (var file in Directory.GetFiles(sourcePath))
             {
-                File.Copy(newPath, newPath.Replace(Path.Combine(TargetPath, Fo4VrSourcePath), TargetPath), true);
+                var newFile = Path.Combine(targetPath, Path.GetFileName(file));
+
+                if (!File.Exists(newFile))
+                {
+                    Console.WriteLine($"Moving {file} to {newFile}.");
+                    File.Move(file, newFile);
+                }
+                else
+                {
+                    Console.WriteLine($"File already exists, moving {file} to {newFile}_{DateTime.Now:yyyyMMddHHmmss}.");
+                    File.Move(file, $"{newFile}_{DateTime.Now:yyyyMMddHHmmss}");
+                }
             }
         }
     }
