@@ -38,7 +38,7 @@ To install -
 
 3) Place the VR Unifier folder in the Data folder of Fallout 4 VR
 
-4) Copy the following files from the Fallout 4\Data folder to the VR Unifier\FO4 folder -
+4) COPY the following files from the Fallout 4\Data folder to the VR Unifier\FO4 folder -
 * Fallout4.esm
 * Fallout4 - Interface.ba2
 * Fallout4 - Materials.ba2
@@ -46,7 +46,7 @@ To install -
 * Fallout4 - Misc.ba2
 * Fallout4 - Startup.ba2
 
-5) Copy the following files from the Fallout 4 VR\Data folder to the VR Unifier\FO4VR folder -
+5) MOVE the following files from the Fallout 4 VR\Data folder to the VR Unifier\FO4VR folder -
 * Fallout4.esm
 * Fallout4 - Interface.ba2
 * Fallout4 - Materials.ba2
